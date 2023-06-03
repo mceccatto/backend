@@ -16,10 +16,14 @@ class UserController {
         ) {
             res.status(400).json({ 'msg': 'Todos os campos são obrigatórios!' });
         } else {
-            const max = await userModel.findOne({}).sort({ codigo: -1 });
-            user.codigo = max == null ? 1 : max.codigo + 1;
-            const resultado = await userModel.create(user);
-            res.status(201).json({ 'msg': 'Usuário cadastrado com sucesso!', 'user': resultado });
+            if (typeof user.status !== 'boolean') {
+                res.status(400).json({ 'msg': 'Status no formato inválido!' });
+            } else {
+                const max = await userModel.findOne({}).sort({ codigo: -1 });
+                user.codigo = max == null ? 1 : max.codigo + 1;
+                const resultado = await userModel.create(user);
+                res.status(201).json({ 'msg': 'Usuário cadastrado com sucesso!', 'user': resultado });
+            }
         }
     }
 
