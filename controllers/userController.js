@@ -47,21 +47,25 @@ class UserController {
             }
             return;
         } else {
-            const resultado = await userModel.find({
-                $or: [
-                    { nome: { $regex: filtro.busca, $options: 'i' } },
-                    { sobrenome: { $regex: filtro.busca, $options: 'i' } },
-                    { cidade: { $regex: filtro.busca, $options: 'i' } }
-                ],
-                $and: [
-                    { estado: { $regex: filtro.estado, $options: 'i' } },
-                    { status: filtro.status }
-                ]
-            });
-            if (resultado) {
-                res.status(200).json(resultado);
+            if (typeof filtro.status !== 'boolean') {
+                res.status(400).json({ 'msg': 'Status no formato inválido!' });
             } else {
-                res.status(400).json({ 'msg': 'Usuário não encontrado!' });
+                const resultado = await userModel.find({
+                    $or: [
+                        { nome: { $regex: filtro.busca, $options: 'i' } },
+                        { sobrenome: { $regex: filtro.busca, $options: 'i' } },
+                        { cidade: { $regex: filtro.busca, $options: 'i' } }
+                    ],
+                    $and: [
+                        { estado: { $regex: filtro.estado, $options: 'i' } },
+                        { status: filtro.status }
+                    ]
+                });
+                if (resultado) {
+                    res.status(200).json(resultado);
+                } else {
+                    res.status(400).json({ 'msg': 'Usuário não encontrado!' });
+                }
             }
         }
     }
@@ -87,11 +91,16 @@ class UserController {
         } else {
             let user = req.body;
             let msg = '';
-            if (typeof user.status !== "undefined") {
-                if (user.status === true) {
-                    msg = 'Usuário reativado com sucesso!';
+            if (typeof user.status !== 'undefined') {
+                if (typeof user.status !== 'boolean') {
+                    res.status(400).json({ 'msg': 'Status no formato inválido!' });
+                    return;
                 } else {
-                    msg = 'Usuário desativado com sucesso!';
+                    if (user.status === true) {
+                        msg = 'Usuário reativado com sucesso!';
+                    } else {
+                        msg = 'Usuário desativado com sucesso!';
+                    }
                 }
             } else {
                 if (
